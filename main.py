@@ -49,3 +49,33 @@ async def create_task(task: TaskCreate):
     tasks.append(new_task)
 
     return new_task
+
+class TaskUpdate(BaseModel):
+    title: str | None = None
+    done: bool | None = None
+
+
+@app.put("/tasks/{id}")
+async def update_task(id: int, payload: TaskUpdate):
+    if payload.title is None and payload.done is None:
+        raise HTTPException(status_code=400, detail="At least one field (title or done) must be provided for update")
+    for task in tasks:
+        if task["id"] == id:
+            if payload.title is not None:
+                task["title"] = payload.title
+
+            if payload.done is not None:
+                task["done"] = payload.done
+
+            return task
+
+    raise HTTPException(status_code=404, detail=f"Task {id} not found")
+
+@app.delete("/tasks/{id}", status_code=204)
+async def delete_task(id: int):
+    for task in tasks:
+        if task["id"] == id:
+            tasks.remove(task)
+            return
+
+    raise HTTPException(status_code=404, detail=f"Task {id} not found")
