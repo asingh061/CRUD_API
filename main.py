@@ -3,11 +3,11 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-@app.get("/")
+@app.get("/",summary="API information")
 async def read_root():
         return {"name": "Task API", "version": "1.0", "endpoints": ["/tasks"]}  
 
-@app.get("/health")
+@app.get("/health",summary="Health check")
 async def health_check():
         return {"status": "ok"}
 
@@ -17,11 +17,11 @@ tasks = [
     {"id": 3, "title": "TopGun3", "done": False}
 ]
 
-@app.get("/tasks")
+@app.get("/tasks",summary="List all tasks")
 async def get_tasks():
         return tasks
 
-@app.get("/tasks/{id}")
+@app.get("/tasks/{id}",summary="Get a single task by id")
 async def get_task(id:int):
         for task in tasks:
                 if task["id"] == id:
@@ -31,7 +31,7 @@ async def get_task(id:int):
 class TaskCreate(BaseModel):
         title: str
 
-@app.post("/tasks", status_code=201)
+@app.post("/tasks", status_code=201,summary="Create a new task")
 async def create_task(task: TaskCreate):
     if task.title.strip() == "":
         raise HTTPException(status_code=400, detail="Task title cannot be empty")
@@ -55,7 +55,7 @@ class TaskUpdate(BaseModel):
     done: bool | None = None
 
 
-@app.put("/tasks/{id}")
+@app.put("/tasks/{id}",summary="Update an existing task")
 async def update_task(id: int, payload: TaskUpdate):
     if payload.title is None and payload.done is None:
         raise HTTPException(status_code=400, detail="At least one field (title or done) must be provided for update")
@@ -71,7 +71,7 @@ async def update_task(id: int, payload: TaskUpdate):
 
     raise HTTPException(status_code=404, detail=f"Task {id} not found")
 
-@app.delete("/tasks/{id}", status_code=204)
+@app.delete("/tasks/{id}", status_code=204,summary="Delete a task by id")
 async def delete_task(id: int):
     for task in tasks:
         if task["id"] == id:
